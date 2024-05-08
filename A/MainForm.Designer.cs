@@ -118,6 +118,7 @@
             this.checkBoxD.TabIndex = 9;
             this.checkBoxD.Text = "Дейкстры";
             this.checkBoxD.UseVisualStyleBackColor = true;
+            this.checkBoxD.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // checkBoxA
             // 
@@ -130,6 +131,7 @@
             this.checkBoxA.TabIndex = 8;
             this.checkBoxA.Text = "A*";
             this.checkBoxA.UseVisualStyleBackColor = true;
+            this.checkBoxA.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // MainForm
             // 

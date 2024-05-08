@@ -25,8 +25,35 @@ namespace A
         bool _CBD;
         double _SearchTime = 0.5;
 
+        private void checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            _CBA = checkBoxA.Checked;
+            _CBD = checkBoxD.Checked;
+
+            Color colorSF;
+            if (_CBA && _CBD) colorSF = Color.Teal;
+            else if (_CBD) colorSF = Color.DodgerBlue;
+            else colorSF = Color.ForestGreen;
+
+            foreach (var but in _buttons) { but.Text = ""; }
+            for (int i = 0; i < _gridRows; i++)
+            {
+                for (int j = 0; j < _gridColumns; j++) { _buttons[i, j].BackColor = _grid[i, j] == 0 ? Color.White : Color.Black; }
+            }
+            
+            _gridRows = comboBox.SelectedIndex+5;
+            _gridColumns = comboBox2.SelectedIndex+5;
+            _buttons[0, 0].BackColor = colorSF;
+            _buttons[_gridRows - 1, _gridColumns - 1].BackColor = colorSF;
+        }
+
         private void button2_Click(object s, EventArgs e)
         {
+            Color colorSF;
+            if (_CBA && _CBD) colorSF = Color.Teal;
+            else if (_CBD) colorSF = Color.DodgerBlue;
+            else colorSF = Color.ForestGreen;
+
             _gridRows = comboBox.SelectedIndex+5;
             _gridColumns = comboBox2.SelectedIndex+5;
             _grid = new int[_gridRows, _gridColumns];
@@ -60,17 +87,22 @@ namespace A
                     _listControls.Add(button);
 
                     _grid[i, j] = 0;
-                    if ((i == 0 && j == 0) || (i == _gridRows-1 && j == _gridColumns-1)) button.BackColor = Color.Red;
+                    if ((i == 0 && j == 0) || (i == _gridRows-1 && j == _gridColumns-1)) button.BackColor = colorSF;
                 }
             }
         }
 
         private void OnButtonClick(object sender, EventArgs e, int i, int j)
         {
+            Color colorSF;
+            if (_CBA && _CBD) colorSF = Color.Teal;
+            else if (_CBD) colorSF = Color.DodgerBlue;
+            else colorSF = Color.ForestGreen;
+
             if ((i == 0 && j == 0) || (i == _gridRows-1 && j == _gridColumns-1))
             {
                 _grid[i, j] = 0;
-                _buttons[i, j].BackColor = Color.Red;
+                _buttons[i, j].BackColor = colorSF;
             }
             else
             {
@@ -90,16 +122,34 @@ namespace A
             }
             var resultPath = FindWay(_grid);
             int p = 0;
+
+            Color color, colorSF;
+            if (_CBA && _CBD)
+            {
+                color = ColorTranslator.FromHtml("#8CDEC5");
+                colorSF = Color.Teal;
+            }
+            else if (_CBD)
+            {
+                color = Color.LightSkyBlue;
+                colorSF = Color.DodgerBlue;
+            }
+            else
+            {
+                color = Color.LightGreen;
+                colorSF = Color.ForestGreen;
+            }
+
             foreach (var point in await resultPath)
             {
                 _buttons[point.Item1, point.Item2].Text = p++.ToString();
-                _buttons[point.Item1, point.Item2].BackColor = Color.Pink;
+                _buttons[point.Item1, point.Item2].BackColor = color;
                 await Task.Delay((int)(_SearchTime*1000)+200);
             }
             int N = _grid.GetLength(0);
             int M = _grid.GetLength(1);
-            _buttons[0, 0].BackColor = Color.Red;
-            _buttons[N-1, M-1].BackColor = Color.Red;
+            _buttons[0, 0].BackColor = colorSF;
+            _buttons[N-1, M-1].BackColor = colorSF;
         }
 
         public async Task<List<Tuple<int, int>>> FindWay(int[,] grid)
@@ -108,7 +158,8 @@ namespace A
             int M = grid.GetLength(1);
             var start = Tuple.Create(0, 0);
             var end = Tuple.Create(N - 1, M - 1);
-            return await MainForm1.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            if (_CBA) return await MainFormA.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            else return await MainFormD.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
         }
 
         private void textBoxST_TextChanged(object sender, EventArgs e)

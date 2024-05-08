@@ -102,16 +102,34 @@ namespace A
                 case 4: grid = _grid5;
                     break;
             }
+
+            Color color, colorSF;
+            if (_CBA && _CBD)
+            {
+                color = ColorTranslator.FromHtml("#8CDEC5");
+                colorSF = Color.Teal;
+            }
+            else if (_CBD)
+            {
+                color = Color.LightSkyBlue;
+                colorSF = Color.DodgerBlue;
+            }
+            else
+            {
+                color = Color.LightGreen;
+                colorSF = Color.ForestGreen;
+            }
+
             var resultPath = await FindWay(grid);
             int N = grid.GetLength(0), M = grid.GetLength(1), p = 0;
             foreach (var point in resultPath) 
             {
                 _buttons[point.Item1, point.Item2].Text = p++.ToString();
-                _buttons[point.Item1, point.Item2].BackColor = Color.Pink;
+                _buttons[point.Item1, point.Item2].BackColor = color;
                 await Task.Delay((int)(_SearchTime*1000)+200);
             }
-            _buttons[0, 0].BackColor = Color.Red;
-            _buttons[N-1, M-1].BackColor = Color.Red;
+            _buttons[0, 0].BackColor = colorSF;
+            _buttons[N-1, M-1].BackColor = colorSF;
         }
 
         public async Task<List<Tuple<int, int>>> FindWay(int[,] grid)
@@ -120,7 +138,15 @@ namespace A
             int M = grid.GetLength(1);
             var start = Tuple.Create(0, 0);
             var end = Tuple.Create(N-1, M-1);
-            return await MainForm1.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            if (_CBA) return await MainFormA.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            else return await MainFormD.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+        }
+
+        private void checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            _CBA = checkBoxA.Checked;
+            _CBD = checkBoxD.Checked;
+            comboBox_SelectedIndexChanged(sender, e);
         }
 
         private void comboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -142,6 +168,11 @@ namespace A
 
         private void ShowGrid(int[,] grid)
         {
+            Color colorSF;
+            if (_CBA && _CBD) colorSF = Color.Teal;
+            else if (_CBD) colorSF = Color.DodgerBlue;
+            else colorSF = Color.ForestGreen;
+
             int N = grid.GetLength(0);
             int M = grid.GetLength(1);
 
@@ -168,7 +199,7 @@ namespace A
                         Location = new Point(j*30+q, i*30+115),
                         BackColor = Color.White
                     };
-                    if ((i == 0 && j == 0) || (i == N-1 && j == M-1)) button.BackColor = Color.Red; 
+                    if ((i == 0 && j == 0) || (i == N-1 && j == M-1)) button.BackColor = colorSF; 
                     else  button.BackColor = grid[i, j] == 0 ? Color.White : Color.Black;
                     _buttons[i, j] = button;
                     Controls.Add(button);

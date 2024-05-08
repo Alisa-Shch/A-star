@@ -7,8 +7,13 @@ using System.Windows.Forms;
 
 namespace A
 {
-    public partial class MainForm1 : Form
+    public partial class MainFormA : Form
     {
+        public static int Heuristic(Tuple<int, int> a, Tuple<int, int> b)
+        {
+            return Math.Abs(a.Item1 - b.Item1) + Math.Abs(a.Item2 - b.Item2);
+        }
+
         static Button[,] _buttons;
         static bool _CBA;
         static bool _CBD;
@@ -21,13 +26,18 @@ namespace A
             _CBD = CBD;
             _SearchTime = SearchTime;
 
+            Color colorSF;
+            if (_CBA && _CBD) colorSF = Color.Teal;
+            else if (_CBD) colorSF = Color.DodgerBlue;
+            else colorSF = Color.ForestGreen;
+
             int N = grid.GetLength(0), M = grid.GetLength(1);
             foreach (var but in buttons) { but.Text = ""; }
             for (int i = 0; i < N; i++)
             {
                 for (int j = 0; j < M; j++)
                 {
-                    if ((i == 0 && j == 0) || (i == N - 1 && j == M - 1)) buttons[i, j].BackColor = Color.Red;
+                    if ((i == 0 && j == 0) || (i == N - 1 && j == M - 1)) buttons[i, j].BackColor = colorSF;
                     else buttons[i, j].BackColor = grid[i, j] == 0 ? Color.White : Color.Black;
                 }
             }
@@ -47,7 +57,7 @@ namespace A
 
                 foreach (var neighbor in await GetNeighbors(currentPoint, grid))
                 {
-                    var newCost = cost[currentPoint] + 1;
+                    var newCost = cost[currentPoint] + 1 + Heuristic(neighbor, end);
 
                     if (!cost.TryGetValue(neighbor, out var currentCost) || newCost < currentCost)
                     {
@@ -81,8 +91,11 @@ namespace A
             var y = point.Item2;
 
             if (_CBA && !_CBD)
-            { 
-                _buttons[x, y].BackColor = Color.LightGray;
+            {
+                Color myColor = Color.DarkSeaGreen;
+                int alpha = 100; 
+
+                _buttons[x, y].BackColor = Color.FromArgb(alpha, myColor.R, myColor.G, myColor.B);
                 await Task.Delay((int)(_SearchTime * 1000));
             }
 
@@ -93,6 +106,5 @@ namespace A
 
             return neighbors;
         }
-        //алгоритм Дейкстры
     }
 }
