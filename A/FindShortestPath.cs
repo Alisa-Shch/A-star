@@ -7,17 +7,17 @@ using System.Windows.Forms;
 
 namespace A
 {
-    public partial class MainFormA : Form
+    public partial class FindShortestPath
     {
-        public static int Heuristic(Tuple<int, int> a, Tuple<int, int> b)
-        {
-            return Math.Abs(a.Item1 - b.Item1) + Math.Abs(a.Item2 - b.Item2);
-        }
-
         static Button[,] _buttons;
         static bool _CBA;
         static bool _CBD;
         static double _SearchTime;
+
+        public static int Heuristic(Tuple<int, int> a, Tuple<int, int> b)
+        {
+            return Math.Abs(a.Item1 - b.Item1) + Math.Abs(a.Item2 - b.Item2);
+        }
 
         public static async Task<List<Tuple<int, int>>> AStar(int[,] grid, Tuple<int, int> start, Tuple<int, int> end, Button[,] buttons, bool CBA, bool CBD, double SearchTime)
         {
@@ -57,7 +57,9 @@ namespace A
 
                 foreach (var neighbor in await GetNeighbors(currentPoint, grid))
                 {
-                    var newCost = cost[currentPoint] + 1 + Heuristic(neighbor, end);
+                    int q = 1;
+                    if (_CBA) q += Heuristic(neighbor, end);
+                    var newCost = cost[currentPoint] + q;
 
                     if (!cost.TryGetValue(neighbor, out var currentCost) || newCost < currentCost)
                     {
@@ -92,10 +94,14 @@ namespace A
 
             if (_CBA && !_CBD)
             {
-                Color myColor = Color.DarkSeaGreen;
-                int alpha = 100; 
-
-                _buttons[x, y].BackColor = Color.FromArgb(alpha, myColor.R, myColor.G, myColor.B);
+                Color color = Color.DarkSeaGreen;
+                _buttons[x, y].BackColor = Color.FromArgb(100, color.R, color.G, color.B);
+                await Task.Delay((int)(_SearchTime * 1000));
+            }
+            else if (_CBD && !_CBA)
+            {
+                Color color = Color.LightSteelBlue;
+                _buttons[x, y].BackColor = Color.FromArgb(150, color.R, color.G, color.B);
                 await Task.Delay((int)(_SearchTime * 1000));
             }
 

@@ -67,6 +67,7 @@
             // 
             // button2
             // 
+            this.button2.Enabled = false;
             this.button2.Location = new System.Drawing.Point(60, 3);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(81, 33);
@@ -105,13 +106,13 @@
             this.textBoxST.Name = "textBoxST";
             this.textBoxST.Size = new System.Drawing.Size(78, 30);
             this.textBoxST.TabIndex = 10;
-            this.textBoxST.Text = "0,5";
             this.textBoxST.TextChanged += new System.EventHandler(this.textBox_TextChanged);
             this.textBoxST.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_KeyPress);
             // 
             // checkBoxD
             // 
             this.checkBoxD.AutoSize = true;
+            this.checkBoxD.Enabled = false;
             this.checkBoxD.Location = new System.Drawing.Point(147, 45);
             this.checkBoxD.Name = "checkBoxD";
             this.checkBoxD.Size = new System.Drawing.Size(127, 29);
@@ -125,6 +126,7 @@
             this.checkBoxA.AutoSize = true;
             this.checkBoxA.Checked = true;
             this.checkBoxA.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxA.Enabled = false;
             this.checkBoxA.Location = new System.Drawing.Point(147, 5);
             this.checkBoxA.Name = "checkBoxA";
             this.checkBoxA.Size = new System.Drawing.Size(53, 29);

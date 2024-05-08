@@ -79,11 +79,12 @@ namespace A
         Button[,] _buttons;
         bool _CBA;
         bool _CBD;
-        double _SearchTime = 0.5;
+        double _SearchTime = 0.1;
 
         public MainForm()
         {
             InitializeComponent();
+            textBoxST.Text = _SearchTime.ToString();
         }
 
         private async void button2_Click(object s, EventArgs e)
@@ -137,20 +138,53 @@ namespace A
             int N = grid.GetLength(0);
             int M = grid.GetLength(1);
             var start = Tuple.Create(0, 0);
-            var end = Tuple.Create(N-1, M-1);
-            if (_CBA) return await MainFormA.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
-            else return await MainFormD.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            var end = Tuple.Create(N-1, M-1); 
+            return await FindShortestPath.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
         }
 
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             _CBA = checkBoxA.Checked;
             _CBD = checkBoxD.Checked;
-            comboBox_SelectedIndexChanged(sender, e);
+
+            int[,] grid = _grid1;
+            switch (comboBox.SelectedIndex)
+            {
+                case 1:
+                    grid = _grid2;
+                    break;
+                case 2:
+                    grid = _grid3;
+                    break;
+                case 3:
+                    grid = _grid4;
+                    break;
+                case 4:
+                    grid = _grid5;
+                    break;
+            }
+            int N = grid.GetLength(0);
+            int M = grid.GetLength(1);
+
+            Color colorSF;
+            if (_CBA && _CBD) colorSF = Color.Teal;
+            else if (_CBD) colorSF = Color.DodgerBlue;
+            else colorSF = Color.ForestGreen;
+                        
+            foreach (var but in _buttons) { but.Text = ""; }
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < M; j++) { _buttons[i, j].BackColor = grid[i, j] == 0 ? Color.White : Color.Black; }
+            }
+            _buttons[0, 0].BackColor = colorSF;
+            _buttons[N-1, M-1].BackColor = colorSF;
         }
 
         private void comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            button2.Enabled = true;
+            checkBoxA.Enabled = true;
+            checkBoxD.Enabled = true;
             switch (comboBox.SelectedIndex)
             {
                 case 0: ShowGrid(_grid1);
@@ -183,8 +217,8 @@ namespace A
 
             if (M*30 < MinimumSize.Width) panel.Location = new Point(MinimumSize.Width/2 - panel.Width/2, 0);
             else panel.Location = new Point(M*30/2 - panel.Width/2, 0);
-            Width = MinimumSize.Width; Height = MinimumSize.Height;
-            //CenterToScreen();
+            Width = MinimumSize.Width; 
+            Height = MinimumSize.Height;
 
             int q = 0;
             if (comboBox.SelectedIndex == 0) q = 65;

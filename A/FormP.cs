@@ -10,12 +10,6 @@ namespace A
     {
         static private MainForm _mainForm;
 
-        public FormP(MainForm mainForm)
-        {
-            InitializeComponent();
-            _mainForm = mainForm;
-        }
-
         int _gridRows;
         int _gridColumns;
         int[,] _grid;
@@ -23,7 +17,14 @@ namespace A
         Button[,] _buttons;
         bool _CBA;
         bool _CBD;
-        double _SearchTime = 0.5;
+        double _SearchTime = 0.1;
+
+        public FormP(MainForm mainForm)
+        {
+            InitializeComponent();
+            _mainForm = mainForm;
+            textBoxST.Text = _SearchTime.ToString();
+        }
 
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -44,11 +45,15 @@ namespace A
             _gridRows = comboBox.SelectedIndex+5;
             _gridColumns = comboBox2.SelectedIndex+5;
             _buttons[0, 0].BackColor = colorSF;
-            _buttons[_gridRows - 1, _gridColumns - 1].BackColor = colorSF;
+            _buttons[_gridRows-1, _gridColumns-1].BackColor = colorSF;
         }
 
         private void button2_Click(object s, EventArgs e)
         {
+            button1.Enabled = true;
+            checkBoxA.Enabled = true;
+            checkBoxD.Enabled = true;
+
             Color colorSF;
             if (_CBA && _CBD) colorSF = Color.Teal;
             else if (_CBD) colorSF = Color.DodgerBlue;
@@ -64,8 +69,8 @@ namespace A
             
             if (_gridRows*30 < MinimumSize.Width) panel.Location = new Point(MinimumSize.Width/2 - panel.Width/2, 0);
             else panel.Location = new Point(_gridRows*30/2 - panel.Width/2, 0);
-            Width = MinimumSize.Width; Height = MinimumSize.Height;
-            //CenterToScreen();
+            Width = MinimumSize.Width; 
+            Height = MinimumSize.Height;
 
             int q = 0;
             if (comboBox.SelectedIndex <= 5) q = (MinimumSize.Width-_gridRows*30)/2;
@@ -158,8 +163,7 @@ namespace A
             int M = grid.GetLength(1);
             var start = Tuple.Create(0, 0);
             var end = Tuple.Create(N - 1, M - 1);
-            if (_CBA) return await MainFormA.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
-            else return await MainFormD.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            return await FindShortestPath.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
         }
 
         private void textBoxST_TextChanged(object sender, EventArgs e)

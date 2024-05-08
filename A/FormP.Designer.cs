@@ -20,6 +20,7 @@ namespace A
             // 
             // button1
             // 
+            this.button1.Enabled = false;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.button1.Location = new System.Drawing.Point(67, 39);
             this.button1.Name = "button1";
@@ -113,13 +114,13 @@ namespace A
             this.textBoxST.Name = "textBoxST";
             this.textBoxST.Size = new System.Drawing.Size(81, 30);
             this.textBoxST.TabIndex = 10;
-            this.textBoxST.Text = "0,5";
             this.textBoxST.TextChanged += new System.EventHandler(this.textBoxST_TextChanged);
             this.textBoxST.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxST_KeyPress);
             // 
             // checkBoxD
             // 
             this.checkBoxD.AutoSize = true;
+            this.checkBoxD.Enabled = false;
             this.checkBoxD.Location = new System.Drawing.Point(186, 44);
             this.checkBoxD.Name = "checkBoxD";
             this.checkBoxD.Size = new System.Drawing.Size(127, 29);
@@ -133,6 +134,7 @@ namespace A
             this.checkBoxA.AutoSize = true;
             this.checkBoxA.Checked = true;
             this.checkBoxA.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxA.Enabled = false;
             this.checkBoxA.Location = new System.Drawing.Point(186, 5);
             this.checkBoxA.Name = "checkBoxA";
             this.checkBoxA.Size = new System.Drawing.Size(53, 29);
