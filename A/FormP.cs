@@ -2,12 +2,13 @@
 using System.Drawing;
 using System;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace A
 {
     public partial class FormP : Form
     {
-        private MainForm _mainForm;
+        static private MainForm _mainForm;
 
         public FormP(MainForm mainForm)
         {
@@ -15,75 +16,116 @@ namespace A
             _mainForm = mainForm;
         }
 
-        private int gridRows;
-        private int gridColumns;
-
-        private int[,] grid;
-        private Button[,] buttons;
-        List<Button> listControls = new List<Button>();
+        int _gridRows;
+        int _gridColumns;
+        int[,] _grid;
+        List<Button> _listControls = new List<Button>();
+        Button[,] _buttons;
+        bool _CBA;
+        bool _CBD;
+        double _SearchTime = 0.5;
 
         private void button2_Click(object s, EventArgs e)
         {
-            gridRows = comboBox1.SelectedIndex+5;
-            gridColumns = comboBox2.SelectedIndex+5;
-            grid = new int[gridRows, gridColumns];
-            buttons = new Button[gridRows, gridColumns];
+            _gridRows = comboBox.SelectedIndex+5;
+            _gridColumns = comboBox2.SelectedIndex+5;
+            _grid = new int[_gridRows, _gridColumns];
+            _buttons = new Button[_gridRows, _gridColumns];
 
-            for (int i = 0; i < listControls.Count; i++) Controls.Remove(listControls[i]);
-            listControls.Clear();
-
-            panel.Location = new Point(gridRows*30/2 - panel.Width/2, 0);
+            for (int i = 0; i < _listControls.Count; i++) Controls.Remove(_listControls[i]);
+            _listControls.Clear();
+            
+            if (_gridRows*30 < MinimumSize.Width) panel.Location = new Point(MinimumSize.Width/2 - panel.Width/2, 0);
+            else panel.Location = new Point(_gridRows*30/2 - panel.Width/2, 0);
             Width = MinimumSize.Width; Height = MinimumSize.Height;
-            CenterToScreen();
+            //CenterToScreen();
 
-            for (int i = 0; i < gridRows; i++)
+            int q = 0;
+            if (comboBox.SelectedIndex <= 5) q = (MinimumSize.Width-_gridRows*30)/2;
+
+            for (int i = 0; i < _gridRows; i++)
             {
-                for (int j = 0; j < gridColumns; j++)
+                for (int j = 0; j < _gridColumns; j++)
                 {
                     var button = new Button
                     {
                         Size = new Size(30, 30),
-                        Location = new Point(i*30, j*30 + 60)
+                        Location = new Point(i*30+q, j*30+115),
+                        BackColor = Color.White
                     };
                     int P = i, Q = j;
                     button.Click += (sender, args) => OnButtonClick(sender, args, P, Q);
-                    buttons[i, j] = button;
+                    _buttons[i, j] = button;
                     Controls.Add(button);
-                    listControls.Add(button);
+                    _listControls.Add(button);
 
-                    grid[i, j] = 0;
-                    if ((i == 0 && j == 0) || (i == gridRows-1 && j == gridColumns-1)) button.BackColor = Color.Red;
+                    _grid[i, j] = 0;
+                    if ((i == 0 && j == 0) || (i == _gridRows-1 && j == _gridColumns-1)) button.BackColor = Color.Red;
                 }
             }
         }
 
         private void OnButtonClick(object sender, EventArgs e, int i, int j)
         {
-            if ((i == 0 && j == 0) || (i == gridRows-1 && j == gridColumns-1))
+            if ((i == 0 && j == 0) || (i == _gridRows-1 && j == _gridColumns-1))
             {
-                grid[i, j] = 0;
-                buttons[i, j].BackColor = Color.Red;
+                _grid[i, j] = 0;
+                _buttons[i, j].BackColor = Color.Red;
             }
             else
             {
-                grid[i, j] = grid[i, j] == 0 ? 1 : 0;
-                buttons[i, j].BackColor = grid[i, j] == 0 ? Color.White : Color.Black;
+                _grid[i, j] = _grid[i, j] == 0 ? 1 : 0;
+                _buttons[i, j].BackColor = _grid[i, j] == 0 ? Color.White : Color.Black;
             }
         }
 
-        private void button1_Click_1(object sender, EventArgs e)
+        private async void button1_Click_1(object sender, EventArgs e)
         {
-            for (int i = 0; i < gridRows; i++)
+            _CBA = checkBoxA.Checked;
+            _CBD = checkBoxD.Checked;
+            foreach (var but in _buttons) { but.Text = ""; }
+            for (int i = 0; i < _gridRows; i++)
             {
-                for (int j = 0; j < gridColumns; j++) { buttons[i, j].BackColor = grid[i, j] == 0 ? Color.White : Color.Black; }
+                for (int j = 0; j < _gridColumns; j++) { _buttons[i, j].BackColor = _grid[i, j] == 0 ? Color.White : Color.Black; }
             }
-            var resultPath = _mainForm.FindWay(grid);
-            foreach (var point in resultPath) { buttons[point.Item1, point.Item2].BackColor = Color.Pink; }
+            var resultPath = FindWay(_grid);
+            int p = 0;
+            foreach (var point in await resultPath)
+            {
+                _buttons[point.Item1, point.Item2].Text = p++.ToString();
+                _buttons[point.Item1, point.Item2].BackColor = Color.Pink;
+                await Task.Delay((int)(_SearchTime*1000)+200);
+            }
+            int N = _grid.GetLength(0);
+            int M = _grid.GetLength(1);
+            _buttons[0, 0].BackColor = Color.Red;
+            _buttons[N-1, M-1].BackColor = Color.Red;
+        }
 
+        public async Task<List<Tuple<int, int>>> FindWay(int[,] grid)
+        {
             int N = grid.GetLength(0);
             int M = grid.GetLength(1);
-            buttons[0, 0].BackColor = Color.Red;
-            buttons[N-1, M-1].BackColor = Color.Red;
+            var start = Tuple.Create(0, 0);
+            var end = Tuple.Create(N - 1, M - 1);
+            return await MainForm1.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+        }
+
+        private void textBoxST_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                _SearchTime = Convert.ToDouble(textBoxST.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void textBoxST_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            _mainForm.textBox_KeyPress(sender, e);
         }
     }
 }
