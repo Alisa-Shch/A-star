@@ -10,8 +10,7 @@ namespace A
     public partial class FindShortestPath
     {
         static Button[,] _buttons;
-        static bool _CBA;
-        static bool _CBD;
+        static (bool A, bool D) _checkBox;
         static double _SearchTime;
 
         public static int Heuristic(Tuple<int, int> a, Tuple<int, int> b)
@@ -19,17 +18,35 @@ namespace A
             return Math.Abs(a.Item1 - b.Item1) + Math.Abs(a.Item2 - b.Item2);
         }
 
-        public static async Task<List<Tuple<int, int>>> AStar(int[,] grid, Tuple<int, int> start, Tuple<int, int> end, Button[,] buttons, bool CBA, bool CBD, double SearchTime)
+        static Color Points()
+        {
+            if (_checkBox.A && _checkBox.D) return Color.Teal;
+            else if (_checkBox.D) return Color.DodgerBlue;
+            else return Color.ForestGreen;
+        }
+
+        static Color FindWay()
+        {
+            if (_checkBox.A && !_checkBox.D)
+            {
+                Color color = Color.DarkSeaGreen;
+                return Color.FromArgb(100, color.R, color.G, color.B);
+            }
+            else if (_checkBox.D && !_checkBox.A)
+            {
+                Color color = Color.LightSteelBlue;
+                return Color.FromArgb(150, color.R, color.G, color.B);
+            }
+            return Color.White;
+        }
+
+        public static async Task<List<Tuple<int, int>>> AStar(int[,] grid, Tuple<int, int> start, Tuple<int, int> end, Button[,] buttons, (bool, bool) checkBox, double SearchTime)
         {
             _buttons = buttons;
-            _CBA = CBA;
-            _CBD = CBD;
+            _checkBox = checkBox;
             _SearchTime = SearchTime;
 
-            Color colorSF;
-            if (_CBA && _CBD) colorSF = Color.Teal;
-            else if (_CBD) colorSF = Color.DodgerBlue;
-            else colorSF = Color.ForestGreen;
+            Color colorSF = Points();
 
             int N = grid.GetLength(0), M = grid.GetLength(1);
             foreach (var but in buttons) { but.Text = ""; }
@@ -37,8 +54,7 @@ namespace A
             {
                 for (int j = 0; j < M; j++)
                 {
-                    if ((i == 0 && j == 0) || (i == N - 1 && j == M - 1)) buttons[i, j].BackColor = colorSF;
-                    else buttons[i, j].BackColor = grid[i, j] == 0 ? Color.White : Color.Black;
+                    buttons[i, j].BackColor = ((i == 0 && j == 0) || (i == N-1 && j == M-1)) ? colorSF : grid[i, j] == 0 ? Color.White : Color.Black;
                 }
             }
 
@@ -57,8 +73,7 @@ namespace A
 
                 foreach (var neighbor in await GetNeighbors(currentPoint, grid))
                 {
-                    int q = 1;
-                    if (_CBA) q += Heuristic(neighbor, end);
+                    int q = _checkBox.A ? Heuristic(neighbor, end)+1 : 1;
                     var newCost = cost[currentPoint] + q;
 
                     if (!cost.TryGetValue(neighbor, out var currentCost) || newCost < currentCost)
@@ -89,26 +104,15 @@ namespace A
         public static async Task<IEnumerable<Tuple<int, int>>> GetNeighbors(Tuple<int, int> point, int[,] grid)
         {
             var neighbors = new List<Tuple<int, int>>();
-            var x = point.Item1;
-            var y = point.Item2;
+            int x = point.Item1, y = point.Item2;
 
-            if (_CBA && !_CBD)
-            {
-                Color color = Color.DarkSeaGreen;
-                _buttons[x, y].BackColor = Color.FromArgb(100, color.R, color.G, color.B);
-                await Task.Delay((int)(_SearchTime * 1000));
-            }
-            else if (_CBD && !_CBA)
-            {
-                Color color = Color.LightSteelBlue;
-                _buttons[x, y].BackColor = Color.FromArgb(150, color.R, color.G, color.B);
-                await Task.Delay((int)(_SearchTime * 1000));
-            }
+            _buttons[x, y].BackColor = FindWay();
+            if (_checkBox.A && !_checkBox.D || !_checkBox.A && _checkBox.D) await Task.Delay((int)(_SearchTime*1000));
 
-            if (x > 0 && grid[x - 1, y] == 0) neighbors.Add(Tuple.Create(x - 1, y));
-            if (x < grid.GetLength(0) - 1 && grid[x + 1, y] == 0) neighbors.Add(Tuple.Create(x + 1, y));
-            if (y > 0 && grid[x, y - 1] == 0) neighbors.Add(Tuple.Create(x, y - 1));
-            if (y < grid.GetLength(1) - 1 && grid[x, y + 1] == 0) neighbors.Add(Tuple.Create(x, y + 1));
+            if (x > 0 && grid[x-1, y] == 0) neighbors.Add(Tuple.Create(x-1, y));
+            if (x < grid.GetLength(0)-1 && grid[x+1, y] == 0) neighbors.Add(Tuple.Create(x+1, y));
+            if (y > 0 && grid[x, y-1] == 0) neighbors.Add(Tuple.Create(x, y-1));
+            if (y < grid.GetLength(1)-1 && grid[x, y+1] == 0) neighbors.Add(Tuple.Create(x, y+1));
 
             return neighbors;
         }

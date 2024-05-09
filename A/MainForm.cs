@@ -39,25 +39,6 @@ namespace A
 
         private readonly int[,] _grid4 = new int[,]
         {
-            { 0, 1, 0, 1, 0, 0, 0, 0, 1, 0 },
-            { 0, 1, 0, 0, 0, 1, 1, 0, 0, 0 },
-            { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0 },
-            { 0, 1, 0, 1, 1, 0, 1, 0, 1, 0 },
-            { 0, 0, 0, 0, 0, 0, 1, 0, 1, 1 },
-            { 1, 1, 1, 1, 1, 0, 1, 0, 1, 0 },
-            { 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 },
-            { 0, 1, 1, 0, 1, 0, 1, 1, 1, 0 },
-            { 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 },
-            { 1, 0, 1, 1, 1, 1, 1, 1, 1, 0 },
-            { 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 },
-            { 0, 1, 1, 0, 1, 1, 1, 0, 1, 0 },
-            { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 },
-            { 0, 1, 0, 1, 1, 0, 1, 1, 1, 1 },
-            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 }
-        };
-
-        private readonly int[,] _grid5 = new int[,]
-        {
             { 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
             { 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0 },
             { 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0 },
@@ -75,10 +56,28 @@ namespace A
             { 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 }
         };
 
+        private readonly int[,] _grid5 = new int[,]
+        {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+            { 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0 },
+            { 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+            { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+            { 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+            { 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+        };
+
         List<Button> _listControls = new List<Button>();
         Button[,] _buttons;
-        bool _CBA;
-        bool _CBD;
+        static (bool A, bool D) _checkBox;
         double _SearchTime = 0.1;
 
         public MainForm()
@@ -89,8 +88,7 @@ namespace A
 
         private async void button2_Click(object s, EventArgs e)
         {
-            _CBA = checkBoxA.Checked;
-            _CBD = checkBoxD.Checked;
+            _checkBox = (checkBoxA.Checked, checkBoxD.Checked);
             int[,] grid = _grid1;
             switch (comboBox.SelectedIndex)
             {
@@ -104,25 +102,9 @@ namespace A
                     break;
             }
 
-            Color color, colorSF;
-            if (_CBA && _CBD)
-            {
-                color = ColorTranslator.FromHtml("#8CDEC5");
-                colorSF = Color.Teal;
-            }
-            else if (_CBD)
-            {
-                color = Color.LightSkyBlue;
-                colorSF = Color.DodgerBlue;
-            }
-            else
-            {
-                color = Color.LightGreen;
-                colorSF = Color.ForestGreen;
-            }
-
             var resultPath = await FindWay(grid);
             int N = grid.GetLength(0), M = grid.GetLength(1), p = 0;
+            Color color = Way(), colorSF = Points();
             foreach (var point in resultPath) 
             {
                 _buttons[point.Item1, point.Item2].Text = p++.ToString();
@@ -135,42 +117,32 @@ namespace A
 
         public async Task<List<Tuple<int, int>>> FindWay(int[,] grid)
         {
-            int N = grid.GetLength(0);
-            int M = grid.GetLength(1);
+            int N = grid.GetLength(0), M = grid.GetLength(1);
             var start = Tuple.Create(0, 0);
             var end = Tuple.Create(N-1, M-1); 
-            return await FindShortestPath.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            return await FindShortestPath.AStar(grid, start, end, _buttons, (checkBoxA.Checked, checkBoxD.Checked), _SearchTime);
         }
 
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            _CBA = checkBoxA.Checked;
-            _CBD = checkBoxD.Checked;
+            _checkBox = (checkBoxA.Checked, checkBoxD.Checked);
 
             int[,] grid = _grid1;
             switch (comboBox.SelectedIndex)
             {
-                case 1:
-                    grid = _grid2;
+                case 1: grid = _grid2;
                     break;
-                case 2:
-                    grid = _grid3;
+                case 2: grid = _grid3;
                     break;
-                case 3:
-                    grid = _grid4;
+                case 3: grid = _grid4;
                     break;
-                case 4:
-                    grid = _grid5;
+                case 4: grid = _grid5;
                     break;
             }
-            int N = grid.GetLength(0);
-            int M = grid.GetLength(1);
+            int N = grid.GetLength(0), M = grid.GetLength(1);
 
-            Color colorSF;
-            if (_CBA && _CBD) colorSF = Color.Teal;
-            else if (_CBD) colorSF = Color.DodgerBlue;
-            else colorSF = Color.ForestGreen;
-                        
+            Color colorSF = Points();
+
             foreach (var but in _buttons) { but.Text = ""; }
             for (int i = 0; i < N; i++)
             {
@@ -202,26 +174,20 @@ namespace A
 
         private void ShowGrid(int[,] grid)
         {
-            Color colorSF;
-            if (_CBA && _CBD) colorSF = Color.Teal;
-            else if (_CBD) colorSF = Color.DodgerBlue;
-            else colorSF = Color.ForestGreen;
+            Color colorSF = Points();
 
-            int N = grid.GetLength(0);
-            int M = grid.GetLength(1);
+            int N = grid.GetLength(0), M = grid.GetLength(1);
 
             _buttons = new Button[N, M];
 
             for (int i = 0; i < _listControls.Count; i++) Controls.Remove(_listControls[i]);
             _listControls.Clear();
-
-            if (M*30 < MinimumSize.Width) panel.Location = new Point(MinimumSize.Width/2 - panel.Width/2, 0);
-            else panel.Location = new Point(M*30/2 - panel.Width/2, 0);
+            
+            panel.Location = M*30 < MinimumSize.Width ? new Point(MinimumSize.Width/2 - panel.Width/2, 0) : new Point(M*30/2 - panel.Width/2, 0);
             Width = MinimumSize.Width; 
             Height = MinimumSize.Height;
 
-            int q = 0;
-            if (comboBox.SelectedIndex == 0) q = 65;
+            int q = comboBox.SelectedIndex == 0 ? 65 : 0;
 
             for (int i = 0; i < N; i++)
             {
@@ -233,13 +199,26 @@ namespace A
                         Location = new Point(j*30+q, i*30+115),
                         BackColor = Color.White
                     };
-                    if ((i == 0 && j == 0) || (i == N-1 && j == M-1)) button.BackColor = colorSF; 
-                    else  button.BackColor = grid[i, j] == 0 ? Color.White : Color.Black;
+                    button.BackColor = ((i == 0 && j == 0) || (i == N-1 && j == M-1)) ? colorSF : grid[i, j] == 0 ? Color.White : Color.Black;
                     _buttons[i, j] = button;
                     Controls.Add(button);
                     _listControls.Add(button);
                 }
             }
+        }
+
+        static Color Way()
+        {
+            if (_checkBox.A && _checkBox.D) return ColorTranslator.FromHtml("#8CDEC5");
+            else if (_checkBox.D) return Color.LightSkyBlue;
+            else return Color.LightGreen;
+        }
+
+        static Color Points()
+        {
+            if (_checkBox.A && _checkBox.D) return Color.Teal;
+            else if (_checkBox.D) return Color.DodgerBlue;
+            else return Color.ForestGreen;
         }
 
         private void button1_Click(object sender, EventArgs e)

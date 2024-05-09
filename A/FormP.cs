@@ -15,8 +15,7 @@ namespace A
         int[,] _grid;
         List<Button> _listControls = new List<Button>();
         Button[,] _buttons;
-        bool _CBA;
-        bool _CBD;
+        static (bool A, bool D) _checkBox;
         double _SearchTime = 0.1;
 
         public FormP(MainForm mainForm)
@@ -28,20 +27,13 @@ namespace A
 
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            _CBA = checkBoxA.Checked;
-            _CBD = checkBoxD.Checked;
-
-            Color colorSF;
-            if (_CBA && _CBD) colorSF = Color.Teal;
-            else if (_CBD) colorSF = Color.DodgerBlue;
-            else colorSF = Color.ForestGreen;
-
+            _checkBox = (checkBoxA.Checked, checkBoxD.Checked);
+            Color colorSF = Points();
             foreach (var but in _buttons) { but.Text = ""; }
             for (int i = 0; i < _gridRows; i++)
             {
                 for (int j = 0; j < _gridColumns; j++) { _buttons[i, j].BackColor = _grid[i, j] == 0 ? Color.White : Color.Black; }
-            }
-            
+            }            
             _gridRows = comboBox.SelectedIndex+5;
             _gridColumns = comboBox2.SelectedIndex+5;
             _buttons[0, 0].BackColor = colorSF;
@@ -54,10 +46,7 @@ namespace A
             checkBoxA.Enabled = true;
             checkBoxD.Enabled = true;
 
-            Color colorSF;
-            if (_CBA && _CBD) colorSF = Color.Teal;
-            else if (_CBD) colorSF = Color.DodgerBlue;
-            else colorSF = Color.ForestGreen;
+            Color colorSF = Points();
 
             _gridRows = comboBox.SelectedIndex+5;
             _gridColumns = comboBox2.SelectedIndex+5;
@@ -65,15 +54,13 @@ namespace A
             _buttons = new Button[_gridRows, _gridColumns];
 
             for (int i = 0; i < _listControls.Count; i++) Controls.Remove(_listControls[i]);
-            _listControls.Clear();
+            _listControls.Clear();            
             
-            if (_gridRows*30 < MinimumSize.Width) panel.Location = new Point(MinimumSize.Width/2 - panel.Width/2, 0);
-            else panel.Location = new Point(_gridRows*30/2 - panel.Width/2, 0);
+            panel.Location = _gridRows*30 < MinimumSize.Width ? new Point(MinimumSize.Width/2 - panel.Width/2, 0) : new Point(_gridRows*30/2 - panel.Width/2, 0);
             Width = MinimumSize.Width; 
             Height = MinimumSize.Height;
 
-            int q = 0;
-            if (comboBox.SelectedIndex <= 5) q = (MinimumSize.Width-_gridRows*30)/2;
+            int q = comboBox.SelectedIndex <= 5 ? (MinimumSize.Width-_gridRows*30)/2 : 0;
 
             for (int i = 0; i < _gridRows; i++)
             {
@@ -99,15 +86,10 @@ namespace A
 
         private void OnButtonClick(object sender, EventArgs e, int i, int j)
         {
-            Color colorSF;
-            if (_CBA && _CBD) colorSF = Color.Teal;
-            else if (_CBD) colorSF = Color.DodgerBlue;
-            else colorSF = Color.ForestGreen;
-
             if ((i == 0 && j == 0) || (i == _gridRows-1 && j == _gridColumns-1))
             {
                 _grid[i, j] = 0;
-                _buttons[i, j].BackColor = colorSF;
+                _buttons[i, j].BackColor = Points();
             }
             else
             {
@@ -118,8 +100,7 @@ namespace A
 
         private async void button1_Click_1(object sender, EventArgs e)
         {
-            _CBA = checkBoxA.Checked;
-            _CBD = checkBoxD.Checked;
+            _checkBox = (checkBoxA.Checked, checkBoxD.Checked);
             foreach (var but in _buttons) { but.Text = ""; }
             for (int i = 0; i < _gridRows; i++)
             {
@@ -127,23 +108,7 @@ namespace A
             }
             var resultPath = FindWay(_grid);
             int p = 0;
-
-            Color color, colorSF;
-            if (_CBA && _CBD)
-            {
-                color = ColorTranslator.FromHtml("#8CDEC5");
-                colorSF = Color.Teal;
-            }
-            else if (_CBD)
-            {
-                color = Color.LightSkyBlue;
-                colorSF = Color.DodgerBlue;
-            }
-            else
-            {
-                color = Color.LightGreen;
-                colorSF = Color.ForestGreen;
-            }
+            Color color = Way(), colorSF = Points();
 
             foreach (var point in await resultPath)
             {
@@ -151,8 +116,7 @@ namespace A
                 _buttons[point.Item1, point.Item2].BackColor = color;
                 await Task.Delay((int)(_SearchTime*1000)+200);
             }
-            int N = _grid.GetLength(0);
-            int M = _grid.GetLength(1);
+            int N = _grid.GetLength(0), M = _grid.GetLength(1);
             _buttons[0, 0].BackColor = colorSF;
             _buttons[N-1, M-1].BackColor = colorSF;
         }
@@ -163,7 +127,21 @@ namespace A
             int M = grid.GetLength(1);
             var start = Tuple.Create(0, 0);
             var end = Tuple.Create(N - 1, M - 1);
-            return await FindShortestPath.AStar(grid, start, end, _buttons, _CBA, _CBD, _SearchTime);
+            return await FindShortestPath.AStar(grid, start, end, _buttons, (checkBoxA.Checked, checkBoxD.Checked), _SearchTime);
+        }
+
+        static Color Way()
+        {
+            if (_checkBox.A && _checkBox.D) return ColorTranslator.FromHtml("#8CDEC5");
+            else if (_checkBox.D) return Color.LightSkyBlue;
+            else return Color.LightGreen;
+        }
+
+        static Color Points()
+        {
+            if (_checkBox.A && _checkBox.D) return Color.Teal;
+            else if (_checkBox.D) return Color.DodgerBlue;
+            else return Color.ForestGreen;
         }
 
         private void textBoxST_TextChanged(object sender, EventArgs e)
